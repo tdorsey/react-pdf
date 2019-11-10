@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import api from "./api"
 import moment from "moment"
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -32,7 +32,7 @@ export default class Orders extends Component {
             <ul>
                 {this.state.orders && this.state.orders.map(order => {
                     debugger;
-                    return (<><Order order={order} /> <div><Order order={order} mode="print" /></div></>)
+                    return (<Fragment key={order.OrderID}><Order order={order} /> <div><Order order={order} mode="print" /></div></Fragment>)
                 })}
             </ul>
         )
