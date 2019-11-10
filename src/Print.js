@@ -1,7 +1,16 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
-
+import { Page, Text, View, Document, StyleSheet, PDFViewer, Font } from '@react-pdf/renderer';
+import styled from '@react-pdf/styled-components';
 let grey = '#E4E4E4';
+let fontSrcNormal = `http://fonts.gstatic.com/s/merriweather/v13/ZvcMqxEwPfh2qDWBPxn6nqcQoVhARpoaILP7amxE_8g.ttf`
+let fontSrcBold = 'http://fonts.gstatic.com/s/merriweather/v13/ZvcMqxEwPfh2qDWBPxn6nkD2ttfZwueP-QU272T9-k4.ttf'
+let fontFamily = 'Merriwether serif'
+Font.register({
+    family: fontFamily, fonts: [
+        { src: fontSrcNormal, fontStyle: 'normal' },
+        { src: fontSrcBold, fontStyle: 'bold', fontWeight: 700 }
+    ]
+});
 
 // Create styles
 const styles = StyleSheet.create({
@@ -13,7 +22,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         textAlign: 'center',
-        fontFamily: 'Oswald'
+        fontFamily: fontFamily
     },
     author: {
         fontSize: 12,
@@ -23,13 +32,13 @@ const styles = StyleSheet.create({
     subtitle: {
         fontSize: 18,
         margin: 12,
-        fontFamily: 'Oswald'
+        fontFamily: fontFamily
     },
     text: {
         margin: 12,
         fontSize: 14,
         textAlign: 'justify',
-        fontFamily: 'Times-Roman'
+        fontFamily: fontFamily
     },
     image: {
         marginVertical: 15,
@@ -37,6 +46,8 @@ const styles = StyleSheet.create({
     },
     header: {
         fontSize: 12,
+        fontWeight: 'bold',
+        fontFamily: fontFamily,
         marginBottom: 20,
         textAlign: 'center',
         color: 'grey',
@@ -52,38 +63,43 @@ const styles = StyleSheet.create({
     },
     page: {
         flexDirection: 'row',
-        backgroundColor: grey
+        backgroundColor: 'white'
     },
     section: {
         margin: 10,
         padding: 10,
-        flexGrow: 1
-    },
-    tbody: {
+        flexGrow: 1,
         "&:nth-child(even)": {
-            color: 'white'
+            backgroundColor: 'white'
         },
         "&:nth-child(odd)": {
-            color: grey
+            backgroundColor: grey
         },
+
     },
 
 });
 
-const renderEntry = (key, value) => {
+
+const Even = styled.Text`
+  backgroundColor: white
+`;
+
+const Odd = styled.Text`
+  backgroundColor: ${grey}
+`;
+
+const renderEntry = (entry) => {
+    let [key, value] = entry
     if (value) {
-        return <View render={() => (
-            <View>
-                <Text>{`${key}`}</Text>
-            </View>
-        )} />
-    };
+        return <Text key={key}>{key}: {value}</Text>
+    }
 
 }
 
 const renderObjectEntries = (order) => {
-    return Object.entries(order).filter((property) => {
-        let [key, value] = property
+    return Object.entries(order).filter((entry) => {
+        let [key, value] = entry
         return (value != null)
     }).map(renderEntry)
 
@@ -99,7 +115,7 @@ export const OrderDocument = (props) => {
         <PDFViewer>
             <Document>
                 <Page size="Letter" style={styles.page}>
-                    <View style={styles.section}>
+                    <View style={styles.title}>
                         <Text>Order {order.OrderID}</Text>
                         {renderObjectEntries(order)}
                     </View>
