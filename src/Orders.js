@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
 import api from "./api"
 import moment from "moment"
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import { OrderDocument } from './Print';
+
 export default class Orders extends Component {
 
     constructor(props) {
@@ -26,23 +29,26 @@ export default class Orders extends Component {
 
     render = () => {
         return (
-
             <ul>
                 {this.state.orders && this.state.orders.map(order => {
-                    return (<Order order={order} />)
+                    debugger;
+                    return (<><Order order={order} /> <div><Order order={order} mode="print" /></div></>)
                 })}
             </ul>
         )
     }
 }
 
-const Order = (props) => {
+export const Order = (props) => {
     const order = props && props.order
     if (!order) {
         return null;
     }
-    const allowedTimeInTransit = moment(order.RequiredDate).diff(order.OrderDate, 'days')
-    console.log(allowedTimeInTransit)
+    order.allowedTimeInTransit = moment(order.RequiredDate).diff(order.OrderDate, 'days')
+    order.rushType = order.allowedTimeInTransit < 15 ? "Rush Order" : "Standard"
+    if (props.mode === "print") {
+        return (<OrderDocument order={order} />)
+    }
     return (
         <li type="button" className="list-group-item" id="order-list" key={order.OrderID}>
             <div className="row vertical-align">
@@ -52,10 +58,9 @@ const Order = (props) => {
                 </div>
                 <div className="col-sm-3 text-right top">
                     <h4>
-                        {moment(order.OrderDate).local().toDate().toDateString()}
-
+                        {}
                     </h4>
-                    <p>{allowedTimeInTransit < 15 ? "Rush Order" : "Standard"}</p>
+                    <p>{order.rushType}</p>
                 </div>
             </div>
         </li>

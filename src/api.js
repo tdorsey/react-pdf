@@ -6,6 +6,7 @@ class api {
         this.baseUrl = `${this.proxyUrl}/https://services.odata.org/V4/Northwind/Northwind.svc`
         this.ordersUrl = `${this.baseUrl}/Orders`
         this.detailUrl = `${this.baseUrl}/Order_Details`
+        this.metadataUrl = `${this.baseUrl}/$metadata`
 
         setGlobalHeaders();
         axios.create({
@@ -14,13 +15,15 @@ class api {
     }
     getOrders = async () => {
         console.debug("getting orders")
+        debugger;
         let response = await axios.get(this.ordersUrl);
-        return response.data.value;
-        // return response.data.value.slice(0, 5)
+        //return response.data.value;
+        return response.data.value.slice(0, 2)
     }
 
     getMetadata = async () => {
         let response = await axios.get(`${this.baseUrl}/$metadata`);
+        debugger;
         return response.data.value
     }
 }
