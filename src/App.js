@@ -1,26 +1,36 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import api from "./api"
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+import Router from "./Router"
+
+class App extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      orders: []
+    }
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <Router {...this.state} />
+      </div>
+    );
+  }
+  componentDidMount = async () => {
+    try {
+
+      let orders = await api.getOrders();
+      this.setState({ orders: orders })
+    }
+    catch (ex) {
+      console.log(ex);
+    }
+
+  }
 }
 
 export default App;
