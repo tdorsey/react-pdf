@@ -8,10 +8,11 @@ import {
 
 import Home from "./Home"
 import Orders from "./Orders"
-import Print from "./Print"
+import { Batch, Print } from "./Print"
 
-export default function Router() {
+export default function Router(props) {
     return (
+
         <HashRouter>
             <div>
                 <nav>
@@ -22,25 +23,26 @@ export default function Router() {
                         <li>
                             <Link to="/orders">Orders</Link>
                         </li>
-                        <li>
-                            <Link to="/print">Print</Link>
-                        </li>
                     </ul>
                 </nav>
 
                 {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
                 <Switch>
-                    <Route path="/print">
-                        <Print />
+                    <Route path="/print/{:number}">
+                        {/* <Print order={props.orders.pop()} /> */}
                     </Route>
 
                     <Route path="/orders">
-                        <Orders />
+                        <Orders orders={props.orders} />
                     </Route>
-                    <Route path="/">
+                    <Route path={`/order/:orderId`} exact component={Print} {...props} />
+                    <Route path={`/batch/:orderId`} exact component={Batch} {...props} />
+
+                    <Route path="/" exact>
                         <Home />
                     </Route>
+
                 </Switch>
             </div>
         </HashRouter>

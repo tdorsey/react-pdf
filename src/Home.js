@@ -1,6 +1,7 @@
 import React from 'react';
+import { Route, Redirect } from 'react-router-dom';
 function Home() {
-    return <div>{Home}</div>
+    return (<Redirect to={"/"} />)
 }
 
 export default Home;

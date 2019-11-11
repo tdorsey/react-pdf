@@ -1,16 +1,19 @@
-import React from 'react';
-import { Page, Text, View, Document, StyleSheet, PDFViewer, Font } from '@react-pdf/renderer';
+import React, { Component } from 'react';
+import { Page, Text, View, Document, StyleSheet, Font, PDFViewer, PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
 import styled from '@react-pdf/styled-components';
+import moment from "moment"
+import api from './api';
 let grey = '#E4E4E4';
 let fontSrcNormal = `http://fonts.gstatic.com/s/merriweather/v13/ZvcMqxEwPfh2qDWBPxn6nqcQoVhARpoaILP7amxE_8g.ttf`
 let fontSrcBold = 'http://fonts.gstatic.com/s/merriweather/v13/ZvcMqxEwPfh2qDWBPxn6nkD2ttfZwueP-QU272T9-k4.ttf'
-let fontFamily = 'Merriwether serif'
-Font.register({
-    family: fontFamily, fonts: [
-        { src: fontSrcNormal, fontStyle: 'normal' },
-        { src: fontSrcBold, fontStyle: 'bold', fontWeight: 700 }
-    ]
-});
+let fontFamily = null
+//let fontFamily = 'Merriwether serif'
+// Font.register({
+//     family: fontFamily, fonts: [
+//         { src: fontSrcNormal, fontStyle: 'normal' },
+//         { src: fontSrcBold, fontStyle: 'bold', fontWeight: 700 }
+//     ]
+// });
 
 // Create styles
 const styles = StyleSheet.create({
@@ -89,8 +92,18 @@ const Odd = styled.Text`
   backgroundColor: ${grey}
 `;
 
+const formatEntry = (entry) => {
+    let [key, value] = entry;
+    let displayKey, displayValue
+    key.toLowerCase().includes("date") === true ?
+        displayValue = moment(value).local().toDate().toDateString()
+        : displayValue = value
+    displayKey = key
+    return [displayKey, displayValue]
+}
+
 const renderEntry = (entry) => {
-    let [key, value] = entry
+    let [key, value] = formatEntry(entry)
     if (value) {
         return <Text key={key}>{key}: {value}</Text>
     }
@@ -100,31 +113,90 @@ const renderEntry = (entry) => {
 const renderObjectEntries = (order) => {
     return Object.entries(order).filter((entry) => {
         let [key, value] = entry
-        return (value != null)
+        return (!key.startsWith("@") && key !== 'rushType' && key !== 'allowedTimeInTransit' && value != null)
     }).map(renderEntry)
 
 }
 // Create Document Component
-export const OrderDocument = (props) => {
-    const order = { ...props.order }
+const OrderDocument = (props) => {
+    console.log("Document " + props.mode)
+    const order = props.order
+    console.log(props)
+    console.log("order" + order)
     if (!order) {
         return null
     }
 
-    return (
-        <PDFViewer>
-            <Document>
-                <Page size="Letter" style={styles.page}>
-                    <View style={styles.title}>
-                        <Text>Order {order.OrderID}</Text>
-                        {renderObjectEntries(order)}
-                    </View>
-                </Page>
-            </Document>
-        </PDFViewer>
-    );
+    const Doc = <Document>
+        <Page size="Letter" style={styles.page}>
+            <View style={styles.title}>
+                <Text>Order {order.OrderID}</Text>
+                {renderObjectEntries(order)}
+            </View>
+        </Page>
+    </Document>
 
+    switch (props.mode) {
+        default:
+            return (<>
+                <PDFViewer>{Doc}</PDFViewer>
+                <div>
+                    <PDFDownloadLink document={Doc} fileName={`${order.OrderID}.pdf`}>
+                        {({ blob, url, loading, error }) => (loading ? 'Loading document...' : 'Download')}
+                    </PDFDownloadLink>
+                </div></>)
+        case "batch":
+            return (
+                <BlobProvider document={Doc}>
+                    {({ blob, url, loading, error }) => (url)}
+                </BlobProvider>)
+
+
+    }
 }
 
+export class Print extends Component {
 
-export default OrderDocument
+    constructor(props) {
+        super(props)
+        this.state = {}
+    }
+    componentDidMount = () => {
+        const orderId = this.props.orderId || this.props.match.params.orderId
+        api.getOrderById(orderId).then((response) => {
+            this.setState({ order: response })
+        })
+    }
+
+    render = () => {
+        console.log("printrender")
+
+        console.log(this.state.order)
+        return (<div><OrderDocument order={this.state.order} /></div>)
+
+    }
+}
+
+export class Batch extends Component {
+
+    constructor(props) {
+        super(props)
+        this.state = {}
+    }
+    componentDidMount = () => {
+        const orderId = this.props.orderId || this.props.match.params.orderId
+        api.getOrderById(orderId).then((response) => {
+            this.setState({ order: response })
+        })
+    }
+
+    render = () => {
+        console.log("batch")
+
+        console.log(this.state.order)
+        return (<div><OrderDocument order={this.state.order} mode={"batch"} /></div>)
+
+    }
+}
+
+export default Print

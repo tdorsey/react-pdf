@@ -14,16 +14,19 @@ class api {
         });
     }
     getOrders = async () => {
-        console.debug("getting orders")
-        debugger;
+        console.debug("Getting orders")
         let response = await axios.get(this.ordersUrl);
         //return response.data.value;
         return response.data.value.slice(0, 2)
     }
+    getOrderById = async (id) => {
+        let response = await axios.get(`${this.ordersUrl}(${id})`);
+        console.log(response.data)
+        return response.data;
+    }
 
     getMetadata = async () => {
         let response = await axios.get(`${this.baseUrl}/$metadata`);
-        debugger;
         return response.data.value
     }
 }
